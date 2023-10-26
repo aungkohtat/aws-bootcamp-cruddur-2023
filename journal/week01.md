@@ -391,3 +391,414 @@ NOTE:
 &NewLine;
 &nbsp;
 
+![app-work](/_docs/assets/installdb.jpg)
+
+&NewLine;
+&NewLine;
+&nbsp;
+
+-	Now to run the docker-compose.yml file with docker `compose up` to run DynamoDB Local and Postgres to see how they interact with the other services in the file.
+-	Right-click on  `docker-compose.yml`
+-	Click on `Compose Up` to run the services
+
+
+&NewLine;
+&NewLine;
+&nbsp;
+
+-	Go to PORTS tab in Gitpod terminal that ran DynamoDB and Postgres and unlock ports 4567, 5432, and 8000 to make them Public and accessible. 
+-	DnyamoDB Local is running on port 8000 and Postgres is running on port 5432.
+-	Don’t open port 38487 since it has to do with Gitpod and not with DynamoDB and PostGres.
+
+
+![Correct Unlocked Ports](/_docs/assets/unlock.jpg)
+
+-	Open a new terminal and run the command ‘aws sts get-caller-identity` to confirm AWS CLI is still installed.
+-	Now to check that I can interact with the database using database task code from the challenge “100 Days of Cloud” at  https://github.com/100DaysOfCloud/challenge-dynamodb-local
+-	I chose List Tables task with the following code:
+```sh
+aws dynamodb list-tables --endpoint-url http://localhost:8000
+```
+
+-	Next the Postgres client is installed into Gitpod.
+-	Place the following Postgres driver code into `gitpod.yml` right after “cd $THEIA….”  
+```sh
+  - name: postgres
+    init: |
+      curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc|sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+      echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list
+      sudo apt update
+      sudo apt install -y postgresql-client-13 libpq-dev
+```
+
+-	Run each of the 4 lines of Postgres code SEPARATELY in the Bash Terminal.
+&NewLine;
+&NewLine;
+&nbsp;
+
+
+-	The code added gpg key to read from a remote repository and installed the Debian package.
+-	I tried to connect to client with the command ‘psql’, but I received the error ` connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: No such file or directory`
+-	I shut down docker  wtth `Compose Down’ and spun it back up with `Compose Up`
+-	Checked the ports to make sure they are open and confirmed they are open to public.
+-	Commit changes to `gitpod.yml`, exited Gitpod, then reopened Gitpod to make sure it recognizes added 4 lines of Postgres code.
+-	I reloaded `docker-compose.yml` using the command ~docker compose up``
+```sh
+docker compose up
+```
+
+-	Added `PostgreSQL` extension to Gitpod and to the file `gitpod.yml`
+
+![Add PostgreSQL Ext to gitpod.yml](/_docs/assets/add-postgresql-to-gitpodyml.png)
+
+-	Proof PostgresSQL extension added to gitpod.yml file
+
+![PostgreSQL in gitpod.yml](/_docs/assets/psqlingitpod.jpg)
+
+
+&NewLine;
+&NewLine;
+&nbsp;
+
+### Connect to Server Via DATABASE Explorer
+-	Before continuing my attempt at connecting to the database server by command line, I will connect by Gitpod `DATABASE`.
+-	Click on DATABASE icon on left vertical taskbar.
+-	Click `+` or `create connection` to create new connection to database server.
+-	I made a successful connection to the database server.
+-	The database is empty and will be populated in Week 2.
+
+![success](/_docs/assets/psqlsuccess.jpg)
+
+&NewLine;
+&NewLine;
+&nbsp;
+
+-	Now I continue with trying to connect to the database server via command line.
+
+-	Again, run the 4 lines of gitpod.yml Postgre coded SEPARATELY in Terminal.
+
+
+```sh
+  - name: postgres
+    init: |
+      curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc|sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+      echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list
+      sudo apt update
+      sudo apt install -y postgresql-client-13 libpq-dev
+```
+
+-	Still unable to connect to the database with command `psql`.
+-	Need to provide local host option with “psql’
+
+```sh
+psql --host localhost
+```
+
+-	I was prompted for password, but the password didn’t work and I received error that “psql: error: connection to server at "localhost" (::1), port 5432 failed: FATAL:  password authentication failed for user "gitpod"”
+-	Tried again using the command:
+```sh
+psql -Upostgres --host localhost
+```
+-	Now I can access postgres
+  
+![psqlUpostgress](/_docs/assets/psqla1.jpg)
+
+
+
+### Launch an Amazon free-tier eligible EC2 instance and install Docker
+
+1. Create an EC2 instance
+![EC2running](/_docs/assets/dockerec2.jpg)
+
+2. Install docker
+` sudo yum install docker -y `
+
+3. Start the Docker service
+`sudo service docker start`
+
+Output:
+
+```sh
+[ec2-user@ip-172-31-27-244 ~]$ sudo service docker start
+Redirecting to /bin/systemctl start docker.service
+[ec2-user@ip-172-31-27-244 ~]$ date
+Fri Feb 24 18:13:02 UTC 2023
+```
+
+4. Check the status of Docker service
+
+Check status:
+`systemctl status docker`
+
+Output:
+```sh
+[ec2-user@ip-172-31-27-244 ~]$ systemctl status docker
+● docker.service - Docker Application Container Engine
+   Loaded: loaded (/usr/lib/systemd/system/docker.service; disabled; vendor preset: disabled)
+   Active: active (running) since Fri 2023-02-24 18:12:56 UTC; 18s ago
+     Docs: https://docs.docker.com
+  Process: 3541 ExecStartPre=/usr/libexec/docker/docker-setup-runtimes.sh (code=exited, status=0/SUCCESS)
+  Process: 3540 ExecStartPre=/bin/mkdir -p /run/docker (code=exited, status=0/SUCCESS)
+ Main PID: 3544 (dockerd)
+    Tasks: 7
+   Memory: 20.8M
+   CGroup: /system.slice/docker.service
+           └─3544 /usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --default-ulimit nofile=32768:65536
+
+Feb 24 18:12:56 ip-172-31-27-244.eu-central-1.compute.internal dockerd[3544]: time="2023-02-24T18:12:56.307285735Z" level=info msg="ClientConn switching balancer to \"pick_first...dule=grpc
+Feb 24 18:12:56 ip-172-31-27-244.eu-central-1.compute.internal dockerd[3544]: time="2023-02-24T18:12:56.345070523Z" level=warning msg="Your kernel does not support cgroup blkio weight"
+Feb 24 18:12:56 ip-172-31-27-244.eu-central-1.compute.internal dockerd[3544]: time="2023-02-24T18:12:56.345497426Z" level=warning msg="Your kernel does not support cgroup blkio ...t_device"
+Feb 24 18:12:56 ip-172-31-27-244.eu-central-1.compute.internal dockerd[3544]: time="2023-02-24T18:12:56.345939221Z" level=info msg="Loading containers: start."
+Feb 24 18:12:56 ip-172-31-27-244.eu-central-1.compute.internal dockerd[3544]: time="2023-02-24T18:12:56.528538493Z" level=info msg="Default bridge (docker0) is assigned with an ... address"
+Feb 24 18:12:56 ip-172-31-27-244.eu-central-1.compute.internal dockerd[3544]: time="2023-02-24T18:12:56.575575709Z" level=info msg="Loading containers: done."
+Feb 24 18:12:56 ip-172-31-27-244.eu-central-1.compute.internal dockerd[3544]: time="2023-02-24T18:12:56.597059083Z" level=info msg="Docker daemon" commit=a89b842 graphdriver(s)=...=20.10.17
+Feb 24 18:12:56 ip-172-31-27-244.eu-central-1.compute.internal dockerd[3544]: time="2023-02-24T18:12:56.597530250Z" level=info msg="Daemon has completed initialization"
+Feb 24 18:12:56 ip-172-31-27-244.eu-central-1.compute.internal systemd[1]: Started Docker Application Container Engine.
+Feb 24 18:12:56 ip-172-31-27-244.eu-central-1.compute.internal dockerd[3544]: time="2023-02-24T18:12:56.623407852Z" level=info msg="API listen on /run/docker.sock"
+Hint: Some lines were ellipsized, use -l to show in full.
+[ec2-user@ip-172-31-27-244 ~]$
+
+```
+
+
+6. Before proceeding further we have to check if we are able to execute Docker commands as non-root user. To verify this, let's execute the docker info command as below:
+` docker info `
+
+Output:
+
+```sh
+[ec2-user@ip-172-31-27-244 ~]$ docker info
+Client:
+ Context:    default
+ Debug Mode: false
+
+Server:
+ERROR: Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.24/info": dial unix /var/run/docker.sock: connect: permission denied
+errors pretty printing info
+
+```
+
+As expected, it did not work.
+
+7. So, we now add our user _ec2_user_ to the _Docker_ group.
+
+`  sudo groupadd docker `
+
+_Note:_ if the _Docker_ group does not exist, we can create it using the below command and then add the user to the group:
+
+` sudo groupadd docker `
+
+For this to take effect, we can either restart our EC2 instance or refresh the group list manually, using the below command:
+
+` sudo usermod -aG docker ec2-user `
+
+_Note:_ If all goes well, we don't expect the command to give a terminal output.
+
+8. Execute the `docker info ` command again.
+
+```sh
+[ec2-user@ip-172-31-27-244 ~]$ docker info
+Client:
+ Context:    default
+ Debug Mode: false
+
+Server:
+ Containers: 0
+  Running: 0
+  Paused: 0
+  Stopped: 0
+ Images: 0
+ Server Version: 20.10.17
+ Storage Driver: overlay2
+  Backing Filesystem: xfs
+  Supports d_type: true
+  Native Overlay Diff: true
+  userxattr: false
+ Logging Driver: json-file
+ Cgroup Driver: cgroupfs
+ Cgroup Version: 1
+ Plugins:
+  Volume: local
+  Network: bridge host ipvlan macvlan null overlay
+  Log: awslogs fluentd gcplogs gelf journald json-file local logentries splunk syslog
+ Swarm: inactive
+ Runtimes: io.containerd.runc.v2 io.containerd.runtime.v1.linux runc
+ Default Runtime: runc
+ Init Binary: docker-init
+ containerd version: 9cd3357b7fd7218e4aec3eae239db1f68a5a6ec6
+ runc version: 5fd4c4d144137e991c4acebb2146ab1483a97925
+ init version: de40ad0
+ Security Options:
+  seccomp
+   Profile: default
+ Kernel Version: 5.10.165-143.735.amzn2.x86_64
+ Operating System: Amazon Linux 2
+ OSType: linux
+ Architecture: x86_64
+ CPUs: 1
+ Total Memory: 964.8MiB
+ Name: ip-172-31-27-244.eu-central-1.compute.internal
+ ID: VQRN:EH7L:TK32:FZHR:35WC:LTIA:VVZ4:MYZY:SQFZ:J4FI:OF6K:ADB2
+ Docker Root Dir: /var/lib/docker
+ Debug Mode: false
+ Registry: https://index.docker.io/v1/
+ Labels:
+ Experimental: false
+ Insecure Registries:
+  127.0.0.0/8
+ Live Restore Enabled: false
+```
+
+### Deploy a container image
+
+1. Let's create an _index.html_ that will be hosted on our Apache container
+
+```html
+<html>
+<head>
+        <title>
+                Tanushree's Docker test
+        </title>
+</head>
+<body>
+        <b>Hello World! This is my first Docker run!</b>
+<body>
+</html>
+```
+
+2. Let's create our first ever **Dockerfile**
+This is a simple Dockerfile, that is pulling the httpd:2.4 image from Dockerhub, and copying  _index.html_ from our EC2 file system to the apache docs hosting path.
+
+```sh
+FROM httpd:2.4
+COPY index.html /usr/local/apache2/htdocs/index.html
+```
+
+3. Now we build our Docker image based on this _Dockerfile_
+
+`docker build -t <name-to-be-assigned-to-the-image> <path to Dockerfile>`
+
+-t : defines the <name>:<tag> for the docker image. (If no tag is defined, the default tag _latest_ gets assigned)
+(.)period : the path where Dockerfile is present (period represents the current directory)
+
+Example:
+
+```sh
+[ec2-user@ip-172-31-27-244 ~]$ docker build -t apache-docker-example .
+Sending build context to Docker daemon  13.31kB
+Step 1/2 : FROM httpd:2.4
+2.4: Pulling from library/httpd
+bb263680fed1: Pull complete
+9e8776e4b876: Pull complete
+f506d7aab652: Pull complete
+05289ee4f284: Pull complete
+b7f64f2f8747: Pull complete
+Digest: sha256:db2d897cae2ad67b33435c1a5b0d6b6465137661ea7c01a5e95155f0159e1bcf
+Status: Downloaded newer image for httpd:2.4
+ ---> 3a4ea134cf8e
+Step 2/2 : COPY index.html /usr/local/apache2/htdocs/index.html
+ ---> ff35af99cd38
+Successfully built ff35af99cd38
+Successfully tagged apache-docker-example:latest
+[ec2-user@ip-172-31-27-244 ~]$
+```	
+	
+4. Verify if the image got created
+`docker images`
+
+This command lists the details of all available Docker images in our local
+Example:
+
+```sh
+[ec2-user@ip-172-31-27-244 ~]$ docker images
+REPOSITORY              TAG       IMAGE ID       CREATED          SIZE
+apache-docker-example   latest    ff35af99cd38   29 seconds ago   145MB
+httpd                   2.4       3a4ea134cf8e   2 weeks ago      145MB
+hello-world             latest    feb5d9fea6a5   17 months ago    13.3kB
+centos                  latest    5d0da3dc9764   17 months ago    231MB
+[ec2-user@ip-172-31-27-244 ~]$
+
+```
+	
+5. Run the docker container from the docker image created in step 3
+	
+`docker run -d --name <assign-name-to-container> -p <local-port>:<remote-port> <image-name>`
+
+	-d : to run as a daemon process
+	-p: for port mapping. mapping local port 80, to docker internal port 80 
+
+```sh
+[ec2-user@ip-172-31-27-244 ~]$ docker run -d --name helloworld -p 80:80 apache-docker-example
+5c8e630daf7ad4843bccddf27eb44c7c4711ec02e9dfdc77de8bc25bbf75e0b4
+[ec2-user@ip-172-31-27-244 ~]$
+
+```
+	
+6. Check running Docker processes
+	
+`docker ps`
+	
+Lists the running docker process and associated details.
+Example:
+
+```sh
+[ec2-user@ip-172-31-27-244 ~]$ docker ps
+CONTAINER ID   IMAGE                   COMMAND              CREATED       STATUS       PORTS                               NAMES
+5c8e630daf7a   apache-docker-example   "httpd-foreground"   2 hours ago   Up 2 hours   0.0.0.0:80->80/tcp, :::80->80/tcp   helloworld
+[ec2-user@ip-172-31-27-244 ~]$
+```
+
+![docker_deployment_complete](/_docs/assets/week1_docker_image_stretch.png)
+
+7. Launch the EC2 public I.P address on port 80 in a web browser to verify if apache was successfully installed and see if our index.html was hosted. 
+
+![apache_container_running](/_docs/assets/container%20run.jpg)
+
+8. To stop a docker process
+`docker stop <docker-container-name>`
+	
+Example: `docker stop alexis_docker`
+	
+### Push container image to Docker Registry
+
+i.  Create a Dockerhub account on the Docker [website](https://hub.docker.com/)
+
+ii. Login to dockerhub from your EC2 instance 
+	` docker login `
+    Enter the Docker user name and password created in (i) when prompted. This will store your credentials in /home/ec2-user/.docker/config.json.
+    _Note:_ it is not a recommended practice to store credentials plainly, rather in a secrets store. (I still need to study up how to configure this with AWS Secrets Manager. )
+
+iii. Tag the docker image we wish to push to Dockerhub against our account
+	`docker tag <image-name>:<assigned-tag> <dockerhub-username>/<name-you-wish-to-assign>:<tag-you-wish-to-assign `
+
+     Example: `docker tag apache-docker-example:latest akhlab/apache-docker-example:latest`
+    
+ iv. Push the image to Dockerhub
+ 	`docker push <dockerhub-username>/<name-you-assigned-in-step-iii>:<tag-you-assigned-in-step-iii`
+   
+     Example: `docker push akhlab/apache-docker-example:latest`
+
+![docker image](/_docs/assets/upload.jpg)
+
+v. Verify the image availability in your DockerHub account
+
+![docker image](/_docs/assets/dockerhubrepo.jpg)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
