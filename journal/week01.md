@@ -798,7 +798,7 @@ v. Verify the image availability in your DockerHub account
 9. [Write a React Page for Notifications](https://www.youtube.com/watch?v=k-_o0cCpksk&list=PLBfufR7vyJJ7k25byhRXJldB5AiwgNnWv&index=27) :white_check_mark:
 10. [Run DynamoDB Local Container and ensure it works](https://www.youtube.com/watch?v=CbQNMaa6zTg&list=PLBfufR7vyJJ7k25byhRXJldB5AiwgNnWv&index=28) :white_check_mark:
 11. [Run Postgres Container and ensure it works](https://www.youtube.com/watch?v=CbQNMaa6zTg&list=PLBfufR7vyJJ7k25byhRXJldB5AiwgNnWv&index=28) :white_check_mark:
-12. Cloud careers [livestream](https://www.youtube.com/watch?v=E0haz6mymxY) 
+12. Cloud careers [livestream](https://www.youtube.com/watch?v=E0haz6mymxY) :white_check_mark:
 
 
 
