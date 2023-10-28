@@ -785,6 +785,68 @@ v. Verify the image availability in your DockerHub account
 ![docker image](/_docs/assets/dockerhubrepo.jpg)
 
 
+ ## Create a Notification feature
+ [AB's video](https://www.youtube.com/watch?v=k-_o0cCpksk&list=PLBfufR7vyJJ7k25byhRXJldB5AiwgNnWv&index=28)
+
+
+ - OpenAPI previouslly called "Swagger", is a standard for open APIs
+ - Many AWS services are integrated with OpenAPI (eg: API Gateway)
+ - OpenAPI extension can be used to view the various API endpoints in our API file. (open the API file,  and click the OpenAPI extension button to view this)
+ - We can also get a preview of our avaibale API endpoints by clicking this highlighted button on the top right
+ - OpenAPI is a good standard for documenting our APIs
+
+1. Launch Gitpod
+ 2. Install npm for the Frontend
+	```
+	cd frontend-react-js
+	npm i
+	```
+	![install_npm](/_docs/assets/install_npm.jpg)
+
+  3. Compose up _docker_compose.yml_
+	(right click the file -> compose up)
+	![docker_compose](/_docs/assets/docker_compose_up.png)
+
+  4. Launch the frontend
+5. Register yourself as a user (this is not fully implemented. Most values are hardcoded as of now)
+6. For the activation code use **1234**
+7. After logging in, notice your username is showing as a registered user on the _left tab_
+8. Navigate to **Notifications** . You will notice an error. Notifications feature has not been coded yet, we will be doing this today!
+
+	![login_app](/_docs/assets/Cruddur.jpg)
+
+[OpenAPI documentation](https://spec.openapis.org/oas/v3.1.0)
+
+#### Let's add code for our notifications feature
+9. We open and create a new API endpoint. 
+ -  Open the file _openapi-3.0.yml_ and then open the OpenAPI extension
+ -  Click the ... next to _PATHS_ and create click "OpenAPI: add new path" to add a new API endpoint.
+
+ ![nes api](/_docs/assets/new_api.jpg)
+
+-  Give it the name "/api/activities/notifications". Let's refer a similar existing endpoint and add the following code to our endpoint:	
+	```yaml
+	/api/activities/notifications:
+    get:
+      description: 'Return a feed of activity for all those I follow'
+      tags: 
+        - activities
+      parameters: []
+      responses:
+        '200':
+          description: Returns an array of activities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+	
+	```
+	
+	![frontend_flask]
+
+
 
 
 ## Reference Link
@@ -800,6 +862,9 @@ v. Verify the image availability in your DockerHub account
 10. [Run DynamoDB Local Container and ensure it works](https://www.youtube.com/watch?v=CbQNMaa6zTg&list=PLBfufR7vyJJ7k25byhRXJldB5AiwgNnWv&index=28) :white_check_mark:
 11. [Run Postgres Container and ensure it works](https://www.youtube.com/watch?v=CbQNMaa6zTg&list=PLBfufR7vyJJ7k25byhRXJldB5AiwgNnWv&index=28) :white_check_mark:
 12. Cloud careers [livestream](https://www.youtube.com/watch?v=E0haz6mymxY) :white_check_mark:
+
+
+
 
 
 
